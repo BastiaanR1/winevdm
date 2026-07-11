@@ -1857,9 +1857,9 @@ static LPCSTR parse_menu_resource( SEGPTR segres, HMENU hMenu, BOOL oldFormat )
             id = GET_WORD(res);
             res += sizeof(WORD);
         }
-        str = res;
-        res += strlen(str) + 1;
-        if (flags & MF_OWNERDRAW) str = segres + (str - start);
+        str = *res ? res : NULL;
+        res += strlen(res) + 1;
+        if (str && (flags & MF_OWNERDRAW)) str = segres + (str - start);
         if (flags & MF_POPUP)
         {
             HMENU hSubMenu = CreatePopupMenu();
@@ -1868,10 +1868,7 @@ static LPCSTR parse_menu_resource( SEGPTR segres, HMENU hMenu, BOOL oldFormat )
             AppendMenuA( hMenu, flags, (UINT_PTR)hSubMenu, str );
         }
         else  /* Not a popup */
-        {
-            LPCSTR newitem = flags & MF_OWNERDRAW ? str : (*str ? str : NULL);
-            AppendMenuA( hMenu, flags, id, newitem );
-        }
+            AppendMenuA( hMenu, flags, id, str );
     } while (!end_flag);
     return res;
 }
