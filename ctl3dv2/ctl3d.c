@@ -110,6 +110,7 @@ static void ctl3d_static(DWORD type, DWORD *style, DWORD *exstyle)
             if (type & CTL3D_STATICFRAMES)
             {
                 *style &= ~SS_BLACKFRAME;
+                *style |= SS_USERITEM;
                 *exstyle |= WS_EX_CLIENTEDGE;
             }
             break;
@@ -124,6 +125,7 @@ static void ctl3d_static(DWORD type, DWORD *style, DWORD *exstyle)
             if (type & CTL3D_STATICFRAMES)
             {
                 *style &= ~SS_WHITEFRAME;
+                *style |= SS_USERITEM;
                 *exstyle |= WS_EX_DLGMODALFRAME;
             }
             break;
@@ -216,7 +218,7 @@ BOOL16 WINAPI Ctl3dColorChange16(void)
 /***********************************************************************
  *		Ctl3dCtlColor (CTL3DV2.4)
  */
-HBRUSH WINAPI Ctl3dCtlColor16(HDC16 hdc, LONG hwnd)
+HBRUSH16 WINAPI Ctl3dCtlColor16(HDC16 hdc, LONG hwnd)
 {
     return 0;
 }
@@ -224,9 +226,9 @@ HBRUSH WINAPI Ctl3dCtlColor16(HDC16 hdc, LONG hwnd)
 /***********************************************************************
  *		Ctl3dCtlColorEx (CTL3DV2.18)
  */
-HBRUSH WINAPI Ctl3dCtlColorEx16(UINT16 msg, WPARAM16 wParam, LPARAM lParam)
+HBRUSH16 WINAPI Ctl3dCtlColorEx16(UINT16 msg, WPARAM16 wParam, LPARAM lParam)
 {
-    return 0;
+    return Ctl3dCtlColor16(wParam, lParam);
 }
 
 /***********************************************************************
@@ -313,6 +315,7 @@ BOOL CALLBACK ctl3d_enumproc(HWND hwnd, LPARAM lparam)
     if (GetParent(hwnd) != data->parent)
         return TRUE;
     Ctl3dSubclassCtlEx16(HWND_16(hwnd), data->types);
+    return TRUE;
 }
 /***********************************************************************
  *		Ctl3dSubclassDlgEx (CTL3DV2.21)
