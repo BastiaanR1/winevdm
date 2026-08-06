@@ -3965,7 +3965,7 @@ static unsigned INT21_FindHelper(LPCWSTR fullPath, unsigned drive, unsigned coun
         if (count) return 0;
         path[0] = drive + 'A';
         volname[0] = '\0';
-        entry->cAlternateFileName[0] = '\0';
+        memset(entry->cAlternateFileName, 0, 14 * sizeof(WCHAR));
         if (!GetVolumeInformationW(path, volname, MAX_PATH, NULL, NULL, NULL, NULL, 0)) return 0;
         if (!volname[0]) return 0;
         RtlSecondsSince1970ToTime( 0, (LARGE_INTEGER *)&entry->ftCreationTime );
