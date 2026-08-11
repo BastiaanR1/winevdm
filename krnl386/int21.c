@@ -2091,6 +2091,7 @@ static BOOL INT21_FileAttributes( CONTEXT *context,
     HANDLE   handle;
     BOOL     status;
     FILETIME filetime;
+    FILETIME filetime2;
     DWORD    result;
     WORD     date, time;
     int      len;
@@ -2159,7 +2160,8 @@ static BOOL INT21_FileAttributes( CONTEXT *context,
             DosDateTimeToFileTime( DI_reg(context), 
                                    CX_reg(context),
                                    &filetime );
-            status = SetFileTime( handle, NULL, NULL, &filetime );
+            LocalFileTimeToFileTime(&filetime, &filetime2);
+            status = SetFileTime( handle, NULL, NULL, &filetime2 );
 
             CloseHandle( handle );
             return status;
@@ -2183,7 +2185,8 @@ static BOOL INT21_FileAttributes( CONTEXT *context,
             status = GetFileTime( handle, NULL, NULL, &filetime );
             if (status)
             {
-                FileTimeToDosDateTime( &filetime, &date, &time );
+                FileTimeToLocalFileTime(&filetime, &filetime2);
+                FileTimeToDosDateTime( &filetime2, &date, &time );
                 SET_DI( context, date );
                 SET_CX( context, time );
             }
@@ -2210,7 +2213,8 @@ static BOOL INT21_FileAttributes( CONTEXT *context,
             DosDateTimeToFileTime( DI_reg(context), 
                                    0,
                                    &filetime );
-            status = SetFileTime( handle, NULL, &filetime, NULL );
+            LocalFileTimeToFileTime(&filetime, &filetime2);
+            status = SetFileTime( handle, NULL, &filetime2, NULL );
 
             CloseHandle( handle );
             return status;
@@ -2234,7 +2238,8 @@ static BOOL INT21_FileAttributes( CONTEXT *context,
             status = GetFileTime( handle, NULL, &filetime, NULL );
             if (status)
             {
-                FileTimeToDosDateTime( &filetime, &date, NULL );
+                FileTimeToLocalFileTime(&filetime, &filetime2);
+                FileTimeToDosDateTime( &filetime2, &date, NULL );
                 SET_DI( context, date );
             }
 
@@ -2263,7 +2268,8 @@ static BOOL INT21_FileAttributes( CONTEXT *context,
             DosDateTimeToFileTime( DI_reg(context),
                                    CX_reg(context),
                                    &filetime );
-            status = SetFileTime( handle, &filetime, NULL, NULL );
+            LocalFileTimeToFileTime(&filetime, &filetime2);
+            status = SetFileTime( handle, &filetime2, NULL, NULL );
 
             CloseHandle( handle );
             return status;
@@ -2287,7 +2293,8 @@ static BOOL INT21_FileAttributes( CONTEXT *context,
             status = GetFileTime( handle, &filetime, NULL, NULL );
             if (status)
             {            
-                FileTimeToDosDateTime( &filetime, &date, &time );
+                FileTimeToLocalFileTime(&filetime, &filetime2);
+                FileTimeToDosDateTime( &filetime2, &date, &time );
                 SET_DI( context, date );
                 SET_CX( context, time );
                 /*
@@ -2342,6 +2349,7 @@ static BOOL INT21_FileDateTime( CONTEXT *context )
 {
     HANDLE   handle = DosFileHandleToWin32Handle(BX_reg(context));
     FILETIME filetime;
+    FILETIME filetime2;
     WORD     date, time;
 
     switch (AL_reg(context)) {
@@ -2351,7 +2359,8 @@ static BOOL INT21_FileDateTime( CONTEXT *context )
         {
             if (!GetFileTime( handle, NULL, NULL, &filetime ))
                 return FALSE;
-            FileTimeToDosDateTime( &filetime, &date, &time );
+            FileTimeToLocalFileTime(&filetime, &filetime2);
+            FileTimeToDosDateTime( &filetime2, &date, &time );
             SET_DX( context, date );
             SET_CX( context, time );
             break;
@@ -2371,7 +2380,8 @@ static BOOL INT21_FileDateTime( CONTEXT *context )
             DosDateTimeToFileTime( DX_reg(context), 
                                    CX_reg(context),
                                    &filetime );
-            if (!SetFileTime( handle, NULL, NULL, &filetime ))
+            LocalFileTimeToFileTime(&filetime, &filetime2);
+            if (!SetFileTime( handle, NULL, NULL, &filetime2 ))
                 return FALSE;
             break;
         }
@@ -2382,7 +2392,8 @@ static BOOL INT21_FileDateTime( CONTEXT *context )
         {
             if (!GetFileTime( handle, NULL, &filetime, NULL ))
                 return FALSE;
-            FileTimeToDosDateTime( &filetime, &date, &time );
+            FileTimeToLocalFileTime(&filetime, &filetime2);
+            FileTimeToDosDateTime( &filetime2, &date, &time );
             SET_DX( context, date );
             SET_CX( context, time );
             break;
@@ -2395,7 +2406,8 @@ static BOOL INT21_FileDateTime( CONTEXT *context )
             DosDateTimeToFileTime( DX_reg(context), 
                                    CX_reg(context),
                                    &filetime );
-            if (!SetFileTime( handle, NULL, &filetime, NULL ))
+            LocalFileTimeToFileTime(&filetime, &filetime2);
+            if (!SetFileTime( handle, NULL, &filetime2, NULL ))
                 return FALSE;
             break;
         }
@@ -2406,7 +2418,8 @@ static BOOL INT21_FileDateTime( CONTEXT *context )
         {
             if (!GetFileTime( handle, &filetime, NULL, NULL ))
                 return FALSE;
-            FileTimeToDosDateTime( &filetime, &date, &time );
+            FileTimeToLocalFileTime(&filetime, &filetime2);
+            FileTimeToDosDateTime( &filetime2, &date, &time );
             SET_DX( context, date );
             SET_CX( context, time );
             /*
@@ -2426,7 +2439,8 @@ static BOOL INT21_FileDateTime( CONTEXT *context )
             DosDateTimeToFileTime( DX_reg(context), 
                                    CX_reg(context),
                                    &filetime );
-            if (!SetFileTime( handle, &filetime, NULL, NULL ))
+            LocalFileTimeToFileTime(&filetime, &filetime2);
+            if (!SetFileTime( handle, &filetime2, NULL, NULL ))
                 return FALSE;
             break;
         }
