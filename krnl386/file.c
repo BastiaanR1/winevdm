@@ -305,6 +305,15 @@ void FILE_CloseAll()
     HeapFree(GetProcessHeap(), 0, dos_handles);
 }
 
+BOOL is_cdrom_file(LPCSTR name)
+{
+    char path[MAX_PATH];
+    if(!GetFullPathNameA(name, MAX_PATH, &path, NULL))
+        return FALSE;
+    path[3] = 0;
+    return GetDriveTypeA(path) == DRIVE_CDROM;
+}
+
 /***********************************************************************
  *           FILE_InitProcessDosHandles
  *
@@ -969,10 +978,14 @@ LONG WINAPI _llseek16( HFILE16 hFile, LONG lOffset, INT16 nOrigin )
  */
 HFILE16 WINAPI _lopen16( LPCSTR path, INT16 mode )
 {
+    HFILE fh;
     CHAR buf[MAX_PATH];
     path = RedirectSystemDir(path, buf, MAX_PATH);
     path = RedirectDriveRoot(path, buf, MAX_PATH, FALSE);
-    return Win32HandleToDosFileHandle( (HANDLE)_lopen( path, mode ) );
+    fh =_lopen(path, mode);
+    if((fh == INVALID_HANDLE_VALUE) && (GetLastError() == ERROR_ACCESS_DENIED) && is_cdrom_file(path))
+        fh = _lopen(path, OF_READ);
+    return Win32HandleToDosFileHandle((HANDLE)fh);
 }
 
 
